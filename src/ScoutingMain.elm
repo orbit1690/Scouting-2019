@@ -3,7 +3,7 @@ module ScoutingMain exposing (Model, Msg)
 import Browser
 import Debug
 import Html exposing (button, div, input, label, text)
-import Html.Attributes as Attributes exposing (style, type_)
+import Html.Attributes as Attributes exposing (placeholder, style, type_, value)
 import Html.Events as Events exposing (onClick)
 import Http
 import Json.Decode
@@ -13,81 +13,95 @@ import String
 main : Program () Model Msg
 main =
     Browser.element
-        { init = always init
+        { init = always ( init, Cmd.none )
         , view = view
-        , update = update
+        , update = \msg model -> ( update msg model, Cmd.none )
         , subscriptions = always subscriptions
         }
 
 
+type Pages
+    = P1
+    | P2
+
+
 type Msg
-    = TeamToAutonomiButton
-    | AutonomiToTeleopButton
+    = ScouterInput String
+    | TeamInput String
+    | MatchInput String
+    | DriverStationPositionInput String
 
 
-type alias Inputs =
+type alias Model =
     { scouterName : String
-    , scoutedTeamNumber : String
-    , matchNumber : String
-    , stationPosition : String
+    , teamNum : String
+    , matchNum : String
+    , driverStationPosition : String
+    , pages : Pages
     }
 
 
-type Model
-    = TeamMode
-    | AutonomiMode
+init : Model
+init =
+    { scouterName = ""
+    , teamNum = ""
+    , matchNum = ""
+    , driverStationPosition = ""
+    , pages = P1
+    }
 
 
-checkbox : Msg -> String -> Html.Html Msg
-checkbox nextButton name =
+checkbox : String -> Msg -> String -> Html.Html Msg
+checkbox modelValue nextButton name =
     label
         [ style "padding" "20px" ]
-        [ input [ type_ "checkbox", onClick nextButton ] []
+        [ input [ type_ "checkbox", onClick nextButton, value modelValue ] []
         , text name
         ]
 
 
-teamDataView : Html.Html Msg
-teamDataView =
+teamDataView : Model -> Html.Html Msg
+teamDataView model =
     div []
-        [ input [ placeholder "Scouter's name", value Inputs.scouterName ] []
-        , input [ placeholder "Scouted team number", value Inputs.scoutedTeamNumber ] []
-        , input [ placeholder "Match number", value Inputs.matchNumber ] []
-        , input [ placeholder "Scouted team driver station position", value Inputs.stationPosition ] []
+        [ checkbox model.scouterName <| ScouterInput "Scouter's name"
+        , checkbox model.teamNum <| TeamInput "Scouted team number"
+        , checkbox model.matchNum <| MatchInput "Match number"
+        , checkbox model.driverStationPosition <| DriverStationPositionInput "Scouted team driver station position"
         ]
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
+autonomiDataView : Html.Html Msg
+autonomiDataView =
+    div []
+        [ text "not created yet" ]
+
+
+update : Msg -> Model -> Model
 update msg model =
     case msg of
-        TeamToAutonomiButton ->
-            ( model, Cmd.none )
+        ScouterInput s ->
+            { model | scouterName = s }
 
-        AutonomiToTeleopButton ->
-            ( model, Cmd.none )
+        TeamInput s ->
+            { model | teamNum = s }
 
-        _ ->
-            ( model, Cmd.none )
+        MatchInput s ->
+            { model | matchNum = s }
+
+        DriverStationPositionInput s ->
+            { model | driverStationPosition = s }
 
 
 view : Model -> Html.Html Msg
 view model =
-    case model of
-        TeamMode ->
-            div []
-                [ teamDataView
-                , checkbox TeamToAutonomiButton "skip"
-                ]
+    case model.pages of
+        P1 ->
+            teamDataView model
 
-        AutonomiMode ->
-            checkbox AutonomiToTeleopButton "none"
+        P2 ->
+            autonomiDataView
 
 
 subscriptions : Sub Msg
 subscriptions =
     Sub.none
-
-
-init : ( Model, Cmd Msg )
-init =
-    ( TeamMode, Cmd.none )
