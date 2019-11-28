@@ -4,7 +4,7 @@ import Browser
 import Debug
 import Html exposing (button, div, input, label, text)
 import Html.Attributes as Attributes exposing (placeholder, style, type_, value)
-import Html.Events as Events exposing (onClick)
+import Html.Events as Events exposing (onClick, onInput)
 import Http
 import Json.Decode
 import String
@@ -30,11 +30,12 @@ type Msg
     | TeamInput String
     | MatchInput String
     | DriverStationPositionInput String
+    | Move
 
 
 type alias Model =
-    { scouterName : String
-    , teamNum : String
+    { scouterName : Int
+    , teamNum : Int
     , matchNum : String
     , driverStationPosition : String
     , pages : Pages
@@ -43,30 +44,28 @@ type alias Model =
 
 init : Model
 init =
-    { scouterName = ""
-    , teamNum = ""
+    { scouterName = 0
+    , teamNum = 0
     , matchNum = ""
     , driverStationPosition = ""
     , pages = P1
     }
 
 
-checkbox : String -> Msg -> String -> Html.Html Msg
+checkbox : String -> (String -> Msg) -> String -> Html.Html Msg
 checkbox modelValue nextButton name =
-    label
-        [ style "padding" "20px" ]
-        [ input [ type_ "checkbox", onClick nextButton, value modelValue ] []
-        , text name
-        ]
+    div []
+        [ input [ placeholder name, onInput nextButton, value modelValue ] [] ]
 
 
 teamDataView : Model -> Html.Html Msg
 teamDataView model =
-    div []
-        [ checkbox model.scouterName <| ScouterInput "Scouter's name"
-        , checkbox model.teamNum <| TeamInput "Scouted team number"
-        , checkbox model.matchNum <| MatchInput "Match number"
-        , checkbox model.driverStationPosition <| DriverStationPositionInput "Scouted team driver station position"
+    Html.pre []
+        [ checkbox (String.fromInt model.scouterName) ScouterInput "Scouter's name"
+        , checkbox (String.fromInt model.teamNum) TeamInput "Scouted team number"
+        , checkbox model.matchNum MatchInput "Match number"
+        , checkbox model.driverStationPosition DriverStationPositionInput "Scouted team driver station position"
+        , button [ onClick Move ] [ Html.text "Move" ]
         ]
 
 
@@ -80,16 +79,19 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         ScouterInput s ->
-            { model | scouterName = s }
+            { model | scouterName = Maybe.withDefault 0 <| String.toInt s }
 
         TeamInput s ->
-            { model | teamNum = s }
+            { model | teamNum = Maybe.withDefault 0 <| String.toInt s }
 
         MatchInput s ->
             { model | matchNum = s }
 
         DriverStationPositionInput s ->
             { model | driverStationPosition = s }
+
+        Move ->
+            { model | pages = P2 }
 
 
 view : Model -> Html.Html Msg
