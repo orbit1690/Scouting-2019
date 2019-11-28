@@ -2,7 +2,7 @@ module Scouting exposing (main)
 
 import Browser
 import Html
-import Html.Attributes exposing (placeholder, value)
+import Html.Attributes exposing (placeholder, style, value)
 import Html.Events exposing (onClick, onInput)
 import Maybe
 import String
@@ -42,6 +42,11 @@ init =
     , driverStation = ""
     , isStarted = False
     }
+
+
+dropDown_driverStation : String
+dropDown_driverStation =
+    "visible"
 
 
 update : Msg -> Model -> Model
@@ -104,6 +109,13 @@ view model =
 
                     else
                         String.fromInt model.matchNum
+                ]
+                []
+            , Html.input
+                [ style "visibility" dropDown_driverStation
+                , placeholder "Driver station..."
+                , onInput DriverStationInput
+                , value model.driverStation
                 ]
                 []
             , Html.button [ onClick Start ]
