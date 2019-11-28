@@ -34,9 +34,9 @@ type Msg
 
 
 type alias Model =
-    { scouterName : Int
+    { scouterName : String
     , teamNum : Int
-    , matchNum : String
+    , matchNum : Int
     , driverStationPosition : String
     , pages : Pages
     }
@@ -44,9 +44,9 @@ type alias Model =
 
 init : Model
 init =
-    { scouterName = 0
+    { scouterName = ""
     , teamNum = 0
-    , matchNum = ""
+    , matchNum = 0
     , driverStationPosition = ""
     , pages = P1
     }
@@ -61,9 +61,9 @@ checkbox modelValue nextButton name =
 teamDataView : Model -> Html.Html Msg
 teamDataView model =
     Html.pre []
-        [ checkbox (String.fromInt model.scouterName) ScouterInput "Scouter's name"
+        [ checkbox model.scouterName ScouterInput "Scouter's name"
         , checkbox (String.fromInt model.teamNum) TeamInput "Scouted team number"
-        , checkbox model.matchNum MatchInput "Match number"
+        , checkbox (String.fromInt model.matchNum) MatchInput "Match number"
         , checkbox model.driverStationPosition DriverStationPositionInput "Scouted team driver station position"
         , button [ onClick Move ] [ Html.text "Move" ]
         ]
@@ -79,13 +79,13 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         ScouterInput s ->
-            { model | scouterName = Maybe.withDefault 0 <| String.toInt s }
+            { model | scouterName = s }
 
         TeamInput s ->
             { model | teamNum = Maybe.withDefault 0 <| String.toInt s }
 
         MatchInput s ->
-            { model | matchNum = s }
+            { model | matchNum = Maybe.withDefault 0 <| String.toInt s }
 
         DriverStationPositionInput s ->
             { model | driverStationPosition = s }
