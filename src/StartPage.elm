@@ -49,7 +49,7 @@ update msg model =
 
         Text newText ->
             if model.name == "" || model.team == "" || model.matchNumber == "" || model.driverPos == "" then
-                { model | text = "Error" }
+                { model | text = "All fields are required" }
 
             else
                 { model | text = "" }
@@ -68,5 +68,5 @@ view model =
         , input [ value model.driverPos, onInput DriverStation ] []
         , Html.text "\n\n               "
         , button [ onClick <| Text "Error" ] [ text "Enter" ]
-        , div [ style "color" "red" ] [ text <| "                " ++ model.text ]
+        , div [ style "color" "red" ] [ text <| "      " ++ model.text ]
         ]
