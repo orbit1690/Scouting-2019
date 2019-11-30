@@ -1,5 +1,6 @@
-module ScoutingMain exposing (Model, Msg)
+module ScoutingMain exposing (Model, Msg, init, subscriptions, update, view)
 
+import AutonomiDataView
 import Browser
 import Debug
 import Html exposing (button, div, input, label, text)
@@ -8,6 +9,7 @@ import Html.Events as Events exposing (onClick, onInput)
 import Http
 import Json.Decode
 import String
+import TeamDataView
 
 
 main : Program () Model Msg
@@ -21,89 +23,62 @@ main =
 
 
 type Pages
-    = P1
-    | P2
+    = Page1
+    | Page2
 
 
 type Msg
-    = ScouterInput String
-    | TeamInput String
-    | MatchInput String
-    | DriverStationPositionInput String
-    | Move
+    = TeamDataMsg TeamDataView.Msg
+    | AutonomiDataMsg AutonomiDataView.Msg
+    | NextPage12
 
 
 type alias Model =
-    { scouterName : String
-    , teamNum : Int
-    , matchNum : Int
-    , driverStationPosition : String
+    { teamData : TeamDataView.Model
+    , autonomiData : AutonomiDataView.Model
     , pages : Pages
     }
 
 
-init : Model
-init =
-    { scouterName = ""
-    , teamNum = 0
-    , matchNum = 0
-    , driverStationPosition = ""
-    , pages = P1
-    }
-
-
-checkbox : String -> (String -> Msg) -> String -> Html.Html Msg
-checkbox modelValue nextButton name =
-    div []
-        [ input [ placeholder name, onInput nextButton, value modelValue ] [] ]
-
-
-teamDataView : Model -> Html.Html Msg
-teamDataView model =
-    Html.pre []
-        [ checkbox model.scouterName ScouterInput "Scouter's name"
-        , checkbox (String.fromInt model.teamNum) TeamInput "Scouted team number"
-        , checkbox (String.fromInt model.matchNum) MatchInput "Match number"
-        , checkbox model.driverStationPosition DriverStationPositionInput "Scouted team driver station position"
-        , button [ onClick Move ] [ Html.text "Move" ]
-        ]
-
-
-autonomiDataView : Html.Html Msg
-autonomiDataView =
-    div []
-        [ text "not created yet" ]
+createButton : Msg -> String -> Html.Html Msg
+createButton bmsg bname =
+    div [] [ button [ onClick bmsg ] [ Html.text bname ] ]
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
-        ScouterInput s ->
-            { model | scouterName = s }
+        TeamDataMsg tmsg ->
+            TeamDataView.update tmsg model.teamData
 
-        TeamInput s ->
-            { model | teamNum = Maybe.withDefault 0 <| String.toInt s }
+        AutonomiDataMsg amsg ->
+            AutonomiDataView.update amsg model.autonomiData
 
-        MatchInput s ->
-            { model | matchNum = Maybe.withDefault 0 <| String.toInt s }
-
-        DriverStationPositionInput s ->
-            { model | driverStationPosition = s }
-
-        Move ->
-            { model | pages = P2 }
+        NextPage12 ->
+            { model | pages = Page2 }
 
 
 view : Model -> Html.Html Msg
 view model =
     case model.pages of
-        P1 ->
-            teamDataView model
+        Page1 ->
+            Html.pre [] [ TeamDataView.view model.teamData, createButton NextPage12 "Next Page" ]
 
-        P2 ->
-            autonomiDataView
+        Page2 ->
+            AutonomiDataView.view model.autonomiData
 
 
-subscriptions : Sub Msg
-subscriptions =
-    Sub.none
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.batch
+        [ Sub.map AutonomiDataMsg <| AutonomiDataView.subscriptions
+        , Sub.map TeamDataMsg <| TeamDataView.subscriptions
+        ]
+
+
+init : Model
+init =
+    { teamData = TeamDataView.init "" "" 0 0
+    , autonomiData = AutonomiDataView.init "" "" 0 0
+    , pages = Page1
+    }
