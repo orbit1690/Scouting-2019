@@ -1,10 +1,11 @@
-module Scouting exposing (main)
+module Scouting exposing (Model, Msg, init, main, update, view)
 
 import Browser
 import Html
 import Html.Attributes exposing (placeholder, style, value)
 import Html.Events exposing (onClick, onInput)
 import Maybe
+import Maybe.Extra as ME
 import String
 
 
@@ -26,9 +27,9 @@ type Msg
 
 
 type alias Model =
-    { scouterName : String
-    , teamNum : Int
-    , matchNum : Int
+    { scouter : String
+    , team : Maybe Int
+    , match : Maybe Int
     , driverStation : String
     , isStarted : Bool
     }
@@ -36,17 +37,12 @@ type alias Model =
 
 init : Model
 init =
-    { scouterName = ""
-    , teamNum = 0
-    , matchNum = 0
+    { scouter = ""
+    , team = Nothing
+    , match = Nothing
     , driverStation = ""
     , isStarted = False
     }
-
-
-dropDown_driverStation : String
-dropDown_driverStation =
-    "visible"
 
 
 update : Msg -> Model -> Model
@@ -54,17 +50,17 @@ update msg model =
     case msg of
         NameInput input ->
             { model
-                | scouterName = input
+                | scouter = input
             }
 
         TeamInput input ->
             { model
-                | teamNum = Maybe.withDefault 0 <| String.toInt input
+                | team = String.toInt input
             }
 
         MatchInput input ->
             { model
-                | matchNum = Maybe.withDefault 0 <| String.toInt input
+                | match = String.toInt input
             }
 
         DriverStationInput input ->
@@ -78,64 +74,78 @@ update msg model =
             }
 
 
+unwrapToString : Maybe Int -> String
+unwrapToString maybeInt =
+    ME.unwrap "" String.fromInt maybeInt
+
+
+inputs : String -> (String -> msg) -> String -> Html.Html msg
+inputs description inputType getValue =
+    Html.pre []
+        [ Html.text <| "\n" ++ description
+        , Html.div []
+            [ Html.input
+                [ placeholder <| String.replace ":" "..." description
+                , onInput inputType
+                , value getValue
+                ]
+                []
+            ]
+        ]
+
+
+startButton : Model -> Html.Html Msg
+startButton model =
+    Html.div []
+        [ Html.button [ onClick Start ]
+            [ Html.text <|
+                if model.isStarted then
+                    "Started"
+
+                else
+                    "Startn't"
+            ]
+        ]
+
+
 view : Model -> Html.Html Msg
 view model =
+    if model.isStarted then
+        view2 model
+
+    else
+        view1 model
+
+
+view1 : Model -> Html.Html Msg
+view1 model =
     Html.div []
         [ Html.text "Pre-Scout screen:"
         , Html.div []
-            [ Html.input
-                [ placeholder "Scouter's name..."
-                , onInput NameInput
-                , value model.scouterName
-                ]
-                []
-            , Html.input
-                [ placeholder "Team's number..."
-                , onInput TeamInput
-                , value <|
-                    if 0 == model.teamNum then
-                        ""
-
-                    else
-                        String.fromInt model.teamNum
-                ]
-                []
-            , Html.input
-                [ placeholder "Match number..."
-                , onInput MatchInput
-                , value <|
-                    if 0 == model.matchNum then
-                        ""
-
-                    else
-                        String.fromInt model.matchNum
-                ]
-                []
-            , Html.input
-                [ style "visibility" dropDown_driverStation
-                , placeholder "Driver station..."
-                , onInput DriverStationInput
-                , value model.driverStation
-                ]
-                []
-            , Html.button [ onClick Start ]
-                [ Html.text <|
-                    if model.isStarted then
-                        "Started"
-
-                    else
-                        "Startn't"
-                ]
+            [ inputs "Scouter's name:" NameInput model.scouter
+            , inputs "Team's number:" TeamInput << unwrapToString <| model.team
+            , inputs "Match number:" MatchInput << unwrapToString <| model.match
+            , inputs "Driver station:" DriverStationInput model.driverStation
             ]
-        , Html.div []
-            [ Html.text <|
-                "Status:  name - "
-                    ++ model.scouterName
-                    ++ ", team - "
-                    ++ String.fromInt model.teamNum
-                    ++ ", match - "
-                    ++ String.fromInt model.matchNum
-                    ++ ", station - "
-                    ++ model.driverStation
-            ]
+        , startButton model
+        ]
+
+
+view2 : Model -> Html.Html Msg
+view2 model =
+    Html.pre []
+        [ Html.text <|
+            String.concat
+                [ "Status:\n"
+                , "\nname - "
+                , model.scouter
+                , "\nteam - "
+                , unwrapToString <| model.team
+                , "\nmatch - "
+                , unwrapToString <| model.match
+                , "\nstation - "
+                , model.driverStation
+                , "\n\n"
+                ]
+        , startButton model
         ]
