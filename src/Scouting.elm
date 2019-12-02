@@ -1,4 +1,4 @@
-module Scouting exposing (Model, Msg, init, main, update, view)
+module Scouting exposing (Model, Msg, driverStations, init, main, update, view)
 
 import Browser
 import Html
@@ -33,23 +33,6 @@ type alias Model =
     , driverStation : String
     , isStarted : Bool
     }
-
-
-
-{-
-   matchOrganizer : Int -> Int -> Int -> Int -> Int -> Int -> List ( Int, String )
-   matchOrganizer t1 t2 t3 t4 t5 t6 =
-       [ ( t1, "כחול 1" ), ( t2, "כחול 2" ), ( t3, "כחול 3" ), ( t4, "אדום 1" ), ( t5, "אדום 2" ), ( t6, "אדום 3" ) ]
-
-
-   driverStations : List (List ( Int, String ))
-   driverStations =
-       [ matchOrganizer 1690 1574 3339 254 2056 1323
-       , matchOrganizer 118 1577 1024 2056 1690 254
-       , matchOrganizer 1574 3339 1577 1323 1024 118
-       , matchOrganizer 3339 1574 1577 1024 118 2056
-       ]
--}
 
 
 driverStations : List (List Int)
@@ -107,14 +90,6 @@ getMatchStations : Int -> List Int
 getMatchStations match =
     -- == [team1, team2, team3, team4, team5, team6]
     withDefault [ 0 ] <| getAt match driverStations
-
-
-
-{- }
-   teamInStation : Int -> Int
-   teamInStation match =
-       first <| getMatchStations match
--}
 
 
 stationIndex : Maybe Int -> Maybe Int -> String
