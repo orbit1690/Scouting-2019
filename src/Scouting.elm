@@ -4,9 +4,10 @@ import Browser
 import Html
 import Html.Attributes exposing (placeholder, style, value)
 import Html.Events exposing (onClick, onInput)
-import Maybe
-import Maybe.Extra as ME
-import String
+import List.Extra exposing (elemIndex, getAt)
+import Maybe exposing (withDefault)
+import Maybe.Extra exposing (unwrap)
+import Tuple exposing (first, second)
 
 
 main : Program () Model Msg
@@ -22,7 +23,6 @@ type Msg
     = NameInput String
     | TeamInput String
     | MatchInput String
-    | DriverStationInput String
     | Start
 
 
@@ -33,6 +33,20 @@ type alias Model =
     , driverStation : String
     , isStarted : Bool
     }
+
+
+matchOrganizer : Int -> Int -> Int -> Int -> Int -> Int -> List ( Int, String )
+matchOrganizer t1 t2 t3 t4 t5 t6 =
+    [ ( t1, "כחול 1" ), ( t2, "כחול 2" ), ( t3, "כחול 3" ), ( t4, "אדום 1" ), ( t5, "אדום 2" ), ( t6, "אדום 3" ) ]
+
+
+driverStations : List (List ( Int, String ))
+driverStations =
+    [ matchOrganizer 1690 1574 3339 254 2056 1323
+    , matchOrganizer 118 1577 1024 2056 1690 254
+    , matchOrganizer 1574 3339 1577 1323 1024 118
+    , matchOrganizer 3339 1574 1577 1024 118 2056
+    ]
 
 
 init : Model
@@ -63,11 +77,6 @@ update msg model =
                 | match = String.toInt input
             }
 
-        DriverStationInput input ->
-            { model
-                | driverStation = input
-            }
-
         Start ->
             { model
                 | isStarted = not model.isStarted
@@ -76,13 +85,40 @@ update msg model =
 
 unwrapToString : Maybe Int -> String
 unwrapToString maybeInt =
-    ME.unwrap "" String.fromInt maybeInt
+    unwrap "" String.fromInt maybeInt
+
+
+getMatchStations : Int -> List ( Int, String )
+getMatchStations match =
+    withDefault [ ( 0, "" ) ] <| getAt match driverStations
+
+
+
+{- }
+   teamInStation : Int -> Int
+   teamInStation match =
+       first <| getMatchStations match
+-}
+
+
+driverStationChooser : Maybe Int -> Maybe Int -> String
+driverStationChooser team match =
+    case elemIndex of
+        a ->
+            if first a == team then
+                second a
+
+            else
+                ""
+
+        _ ->
+            ""
 
 
 inputs : String -> (String -> msg) -> String -> Html.Html msg
 inputs description inputType getValue =
     Html.pre []
-        [ Html.text <| "\n" ++ description
+        [ Html.text <| description
         , Html.div []
             [ Html.input
                 [ placeholder <| String.replace ":" "..." description
@@ -120,12 +156,11 @@ view model =
 view1 : Model -> Html.Html Msg
 view1 model =
     Html.div []
-        [ Html.text "Pre-Scout screen:"
+        [ Html.text <| "Pre-Scout screen:   " ++ driverStationChooser model.match model.team
         , Html.div []
             [ inputs "Scouter's name:" NameInput model.scouter
             , inputs "Team's number:" TeamInput << unwrapToString <| model.team
             , inputs "Match number:" MatchInput << unwrapToString <| model.match
-            , inputs "Driver station:" DriverStationInput model.driverStation
             ]
         , startButton model
         ]
