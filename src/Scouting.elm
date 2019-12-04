@@ -95,28 +95,29 @@ getMatchStations match =
 stationIndex : Maybe Int -> Maybe Int -> String
 stationIndex team match =
     -- team2 -> index = 2
-    unwrapToString << elemIndex (withDefault 0 team) <| getMatchStations (withDefault 0 match)
+    unwrapToString << elemIndex (withDefault 0 team) << getMatchStations <| (withDefault 0 match) - 1
 
 
 indexToName : Maybe Int -> Maybe Int -> String
 indexToName team match =
+    -- Gets model.team and model.match from update, and calls stationIndex
     case stationIndex team match of
-        "1" ->
+        "0" ->
             "כחול 1"
 
-        "2" ->
+        "1" ->
             "כחול 2"
 
-        "3" ->
+        "2" ->
             "כחול 3"
 
-        "4" ->
+        "3" ->
             "אדום 1"
 
-        "5" ->
+        "4" ->
             "אדום 2"
 
-        "6" ->
+        "5" ->
             "אדום 3"
 
         _ ->
