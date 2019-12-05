@@ -1,4 +1,4 @@
-module AutonomiDataView exposing (Model, Msg, init, subscriptions, update, view)
+module AutonomousDataView exposing (Model, Msg, init, subscriptions, update, view)
 
 import Html exposing (button, div, input, label, text)
 import Html.Attributes as Attributes exposing (placeholder, style, type_, value)
@@ -17,18 +17,18 @@ type Msg
 
 type alias Model =
     { scouterName : String
-    , teamNum : Int
-    , matchNum : Int
+    , team : Int
+    , match : Int
     , driverStationPosition : String
     }
 
 
-autonomiDataView : Model -> Html.Html Msg
-autonomiDataView model =
+autonomousDataView : Model -> Html.Html Msg
+autonomousDataView model =
     Html.pre []
         [ checkbox model.scouterName ScouterInput "test"
-        , checkbox (String.fromInt model.teamNum) TeamInput "test"
-        , checkbox (String.fromInt model.matchNum) MatchInput "test"
+        , checkbox (String.fromInt model.team) TeamInput "test"
+        , checkbox (String.fromInt model.match) MatchInput "test"
         , checkbox model.driverStationPosition DriverStationPositionInput "test"
         ]
 
@@ -52,8 +52,8 @@ init : String -> String -> Int -> Int -> Model
 init sN dSP tN mN =
     { scouterName = sN
     , driverStationPosition = dSP
-    , matchNum = mN
-    , teamNum = tN
+    , match = mN
+    , team = tN
     }
 
 
@@ -64,10 +64,10 @@ update msg model =
             { model | scouterName = s }
 
         TeamInput s ->
-            { model | teamNum = Maybe.withDefault 0 <| String.toInt s }
+            { model | team = Maybe.withDefault 0 <| String.toInt s }
 
         MatchInput s ->
-            { model | matchNum = Maybe.withDefault 0 <| String.toInt s }
+            { model | match = Maybe.withDefault 0 <| String.toInt s }
 
         DriverStationPositionInput s ->
             { model | driverStationPosition = s }
@@ -75,7 +75,7 @@ update msg model =
 
 view : Model -> Html.Html Msg
 view model =
-    autonomiDataView model
+    autonomousDataView model
 
 
 subscriptions : Sub Msg
