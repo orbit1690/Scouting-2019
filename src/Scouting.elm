@@ -1,10 +1,11 @@
-module Scouting exposing (Model, Msg, driverStations, init, main, update, view)
+module Scouting exposing (Model, Msg, init, main, update, view)
 
 import Browser
 import Html
 import Html.Attributes exposing (placeholder, style, value)
 import Html.Events exposing (onClick, onInput)
 import List.Extra exposing (elemIndex, getAt)
+import Matches exposing (driverStations)
 import Maybe exposing (withDefault)
 import Maybe.Extra exposing (unwrap)
 import Tuple exposing (first, second)
@@ -30,18 +31,25 @@ type alias Model =
     { scouter : String
     , team : Maybe Int
     , match : Maybe Int
-    , driverStation : String
+    , driverStation : String --PossibleStations
     , isStarted : Bool
     }
 
 
-driverStations : List (List Int)
-driverStations =
-    [ [ 1690, 1574, 3339, 254, 2056, 1323 ]
-    , [ 118, 1577, 1024, 2056, 1690, 254 ]
-    , [ 1574, 3339, 1577, 1323, 1024, 118 ]
-    , [ 3339, 1574, 1577, 1024, 118, 2056 ]
-    ]
+
+{- }
+   PossibleStations =
+       "כחול 1"
+       | "כחול 2"
+       | "כחול 3"
+       |"אדום 1"
+       |"אדום 2"
+       | "אדום 3"
+-}
+
+
+type alias BoolModel =
+    { isStarted : Bool }
 
 
 init : Model
@@ -95,7 +103,7 @@ getMatchStations match =
 stationIndex : Maybe Int -> Maybe Int -> String
 stationIndex team match =
     -- team2 -> index = 2
-    unwrapToString << elemIndex (withDefault 0 team) << getMatchStations <| (withDefault 0 match) - 1
+    unwrapToString << elemIndex (withDefault 0 team) << getMatchStations <| withDefault 0 match - 1
 
 
 indexToName : Maybe Int -> Maybe Int -> String
@@ -190,10 +198,7 @@ view2 model =
                 , "\nstation - "
                 , model.driverStation
                 , "\n\n"
-                , "match1 = [ 1690, 1574, 3339 || 254, 2056, 1323 ]\n"
-                , "match2 = [ 118,  1577, 1024 || 2056, 1690, 254 ]\n"
-                , "match3 = [ 1574, 3339, 1577 || 1323, 1024, 118 ]\n"
-                , "match4 = [ 3339, 1574, 1577 || 1024, 118, 2056 ]"
+                , Matches.asComment
                 ]
         , startButton model
         ]
