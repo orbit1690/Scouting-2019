@@ -1,18 +1,27 @@
 module TeamDataView exposing (Model, Msg, init, subscriptions, update, view)
 
-import Html exposing (button, div, input, label, text)
-import Html.Attributes as Attributes exposing (placeholder, style, type_, value)
+import Html exposing (button, div, fieldset, input, label, text)
+import Html.Attributes as Attributes exposing (checked, name, placeholder, style, type_, value)
 import Html.Events as Events exposing (onClick, onInput)
 import Http
 import Json.Decode
 import String
 
 
+type Station
+    = Red1 String
+    | Red2 String
+    | Red3 String
+    | Blue1 String
+    | Blue2 String
+    | Blue3 String
+
+
 type Msg
     = ScouterInput String
     | TeamInput String
     | MatchInput String
-    | DriverStationPositionInput String
+    | DriverStationPositionInput String String
 
 
 type alias Model =
@@ -29,7 +38,7 @@ teamDataView model =
         [ checkbox model.scouterName ScouterInput "Scouter's name"
         , checkbox (String.fromInt model.team) TeamInput "Scouted team number"
         , checkbox (String.fromInt model.match) MatchInput "Match number"
-        , checkbox model.driverStationPosition DriverStationPositionInput "Scouted team driver station position"
+        , enumList model
         ]
 
 
@@ -39,11 +48,22 @@ checkbox modelValue nextButton name =
         [ input [ placeholder name, onInput nextButton, value modelValue ] [] ]
 
 
-checkList : String -> (String -> Msg) -> String -> Html.Html Msg
-checkList modelValue nextButton name =
+enumList : Model -> Html.Html Msg
+enumList model =
+    div []
+        [ fieldset []
+            [ enumProperty (model.driverStationPosition == "Red1") "Red1"
+            , enumProperty (model.driverStationPosition == "Red2") "Red2"
+            , enumProperty (model.driverStationPosition == "Red3") "Red3"
+            ]
+        ]
+
+
+enumProperty : Bool -> String -> Html.Html Msg
+enumProperty isChecked name =
     label
-        [ style "padding" "20px" ]
-        [ input [ type_ "checkbox", placeholder name, onInput nextButton, value modelValue ] []
+        [ style "padding" "2%" ]
+        [ input [ type_ "radio", placeholder name, onInput <| DriverStationPositionInput name, checked isChecked ] []
         , text name
         ]
 
@@ -59,6 +79,10 @@ init sN dSP tN mN =
 
 update : Msg -> Model -> Model
 update msg model =
+    let
+        _ =
+            Debug.log "in update" <| Debug.toString msg
+    in
     case msg of
         ScouterInput s ->
             { model | scouterName = s }
@@ -69,8 +93,8 @@ update msg model =
         MatchInput s ->
             { model | match = Maybe.withDefault 0 <| String.toInt s }
 
-        DriverStationPositionInput s ->
-            { model | driverStationPosition = s }
+        DriverStationPositionInput name isChecked ->
+            { model | driverStationPosition = name }
 
 
 view : Model -> Html.Html Msg
