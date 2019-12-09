@@ -1,13 +1,11 @@
 module Scouting exposing (Model, Msg, init, main, update, view)
 
 import Browser
+import FunctionList exposing (..)
 import Html
 import Html.Attributes exposing (placeholder, style, value)
 import Html.Events exposing (onClick, onInput)
-import List.Extra exposing (elemIndex, getAt)
-import Matches exposing (driverStations)
-import Maybe exposing (withDefault)
-import Maybe.Extra exposing (unwrap)
+import Matches exposing (asComment, indexToName)
 import Tuple exposing (first, second)
 
 
@@ -34,18 +32,6 @@ type alias Model =
     , driverStation : String --PossibleStations
     , isStarted : Bool
     }
-
-
-
-{- }
-   PossibleStations =
-       "כחול 1"
-       | "כחול 2"
-       | "כחול 3"
-       |"אדום 1"
-       |"אדום 2"
-       | "אדום 3"
--}
 
 
 type alias BoolModel =
@@ -89,49 +75,6 @@ update msg model =
             }
 
 
-unwrapToString : Maybe Int -> String
-unwrapToString maybeInt =
-    unwrap "" String.fromInt maybeInt
-
-
-getMatchStations : Int -> List Int
-getMatchStations match =
-    -- == [team1, team2, team3, team4, team5, team6]
-    withDefault [ 0 ] <| getAt match driverStations
-
-
-stationIndex : Maybe Int -> Maybe Int -> String
-stationIndex team match =
-    -- team2 -> index = 2
-    unwrapToString << elemIndex (withDefault 0 team) << getMatchStations <| withDefault 0 match - 1
-
-
-indexToName : Maybe Int -> Maybe Int -> String
-indexToName team match =
-    -- Gets model.team and model.match from update, and calls stationIndex
-    case stationIndex team match of
-        "0" ->
-            "כחול 1"
-
-        "1" ->
-            "כחול 2"
-
-        "2" ->
-            "כחול 3"
-
-        "3" ->
-            "אדום 1"
-
-        "4" ->
-            "אדום 2"
-
-        "5" ->
-            "אדום 3"
-
-        _ ->
-            ""
-
-
 inputs : String -> (String -> msg) -> String -> Html.Html msg
 inputs description inputType getValue =
     Html.pre []
@@ -173,7 +116,7 @@ view model =
 view1 : Model -> Html.Html Msg
 view1 model =
     Html.div []
-        [ Html.text <| "Pre-Scout screen:   " ++ model.driverStation
+        [ Html.div [ style "text-decoration" "underline" ] [ Html.text <| "Pre-Scout screen:   " ++ model.driverStation ]
         , Html.div []
             [ inputs "Scouter's name:" NameInput model.scouter
             , inputs "Team's number:" TeamInput << unwrapToString <| model.team
@@ -186,10 +129,10 @@ view1 model =
 view2 : Model -> Html.Html Msg
 view2 model =
     Html.pre []
-        [ Html.text <|
+        [ Html.div [ style "text-decoration" "underline" ] [ Html.text "Status:\n" ]
+        , Html.text <|
             String.concat
-                [ "Status:\n"
-                , "\nname - "
+                [ "\nname - "
                 , model.scouter
                 , "\nteam - "
                 , unwrapToString <| model.team
