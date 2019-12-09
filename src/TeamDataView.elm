@@ -5,30 +5,27 @@ import Html.Attributes as Attributes exposing (checked, name, placeholder, style
 import Html.Events as Events exposing (onClick, onInput)
 import Http
 import Json.Decode
+import PrimaryModules
 import String
 
 
-type Station
-    = Red1 String
-    | Red2 String
-    | Red3 String
-    | Blue1 String
-    | Blue2 String
-    | Blue3 String
+type Color
+    = Red
+    | Blue
 
 
 type Msg
     = ScouterInput String
     | TeamInput String
     | MatchInput String
-    | DriverStationPositionInput String String
+    | DriverStationPositionInput Color Position
 
 
 type alias Model =
     { scouterName : String
     , team : Int
     , match : Int
-    , driverStationPosition : String
+    , driverStationPosition : Color Position
     }
 
 
@@ -52,18 +49,21 @@ enumList : Model -> Html.Html Msg
 enumList model =
     div []
         [ fieldset []
-            [ enumProperty (model.driverStationPosition == "Red1") "Red1"
-            , enumProperty (model.driverStationPosition == "Red2") "Red2"
-            , enumProperty (model.driverStationPosition == "Red3") "Red3"
+            [ enumProperty (model.driverStationPosition == 1 Red) 1 Red
+            , enumProperty (model.driverStationPosition == 2 Red) 2 Red
+            , enumProperty (model.driverStationPosition == 3 Red) 3 Red
+            , enumProperty (model.driverStationPosition == 1 Blue) 1 Blue
+            , enumProperty (model.driverStationPosition == 2 Blue) 2 Blue
+            , enumProperty (model.driverStationPosition == 3 Blue) 3 Blue
             ]
         ]
 
 
 enumProperty : Bool -> String -> Html.Html Msg
-enumProperty isChecked name =
+enumProperty isChecked color position =
     label
         [ style "padding" "2%" ]
-        [ input [ type_ "radio", placeholder name, onInput <| DriverStationPositionInput name, checked isChecked ] []
+        [ input [ type_ "radio", placeholder name, onInput <| DriverStationPositionInput color position, checked isChecked ] []
         , text name
         ]
 
@@ -79,10 +79,6 @@ init sN dSP tN mN =
 
 update : Msg -> Model -> Model
 update msg model =
-    let
-        _ =
-            Debug.log "in update" <| Debug.toString msg
-    in
     case msg of
         ScouterInput s ->
             { model | scouterName = s }
@@ -93,8 +89,8 @@ update msg model =
         MatchInput s ->
             { model | match = Maybe.withDefault 0 <| String.toInt s }
 
-        DriverStationPositionInput name isChecked ->
-            { model | driverStationPosition = name }
+        DriverStationPositionInput color position ->
+            { model | driverStationPosition = color position }
 
 
 view : Model -> Html.Html Msg
