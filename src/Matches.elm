@@ -28,11 +28,16 @@ matches =
     ]
 
 
-getMatch : Maybe Int -> Match
+getMatch : Maybe Int -> Maybe Match
 getMatch match =
     -- == {blue = {one = team1, two = team2, three = team3}, red = {one = team4, two = team5, three = team6}}
-    withDefault { blue = { one = 0, two = 0, three = 0 }, red = { one = 0, two = 0, three = 0 } } <|
-        getAt (withDefault 0 match) matches
+    case match of
+        Nothing ->
+            Nothing 
+        Just n ->
+            getAt n matches
+    
+        
 
 
 stationIndex : Maybe Int -> Maybe Int -> String
@@ -40,12 +45,17 @@ stationIndex team match =
     -- team2 -> index = 2
     -- unwrapToString << elemIndex (withDefault 0 team) << getMatch <| withDefault 0 match - 1
     -- withDefault "" String.fromInt (getMatch match)
-    case getMatch.match of
-        blue ->
-            "1"
-
-        red ->
-            "2"
+    case getMatch match of
+            Nothing ->
+                ""
+            Just matchData ->
+                if matchData.blue.one == team then "כחול 1"
+                else if matchData.blue.two == team then "כחול 2"
+                else if matchData.blue.three == team then "כחול 3"
+                else if matchData.red.one == team then "אדום 1"
+                else if matchData.red.two == team then "אדום 2"
+                else if matchData.red.three == team then "אדום 3"
+                else ""
 
 
 stationString : Maybe Int -> Maybe Int -> String

@@ -5,7 +5,7 @@ import FunctionList exposing (..)
 import Html
 import Html.Attributes exposing (placeholder, style, value)
 import Html.Events exposing (onClick, onInput)
-import Matches exposing (asComment, indexToName)
+import Matches exposing (asComment, stationString)
 import Tuple exposing (first, second)
 
 
@@ -59,19 +59,19 @@ update msg model =
         TeamInput input ->
             { model
                 | team = String.toInt input
-                , driverStation = indexToName (String.toInt input) model.match
+                , driverStation = stationString (String.toInt input) model.match
             }
 
         MatchInput input ->
             { model
                 | match = String.toInt input
-                , driverStation = indexToName model.team (String.toInt input)
+                , driverStation = stationString model.team (String.toInt input)
             }
 
         Start ->
             { model
                 | isStarted = not model.isStarted
-                , driverStation = indexToName model.team model.match
+                , driverStation = stationString model.team model.match
             }
 
 
