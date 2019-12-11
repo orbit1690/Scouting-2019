@@ -5,7 +5,7 @@ import FunctionList exposing (inputs, unwrapToString)
 import Html
 import Html.Attributes exposing (placeholder, style, value)
 import Html.Events exposing (onClick, onInput)
-import Matches exposing (asComment, stationString)
+import Matches exposing (asComment, stationIndex)
 import Tuple exposing (first, second)
 
 
@@ -55,28 +55,28 @@ update msg model =
         TeamInput input ->
             { model
                 | team = String.toInt input
-                , driverStation = stationString (String.toInt input) model.match
+                , driverStation = stationIndex (String.toInt input) model.match
             }
 
         MatchInput input ->
             { model
                 | match = String.toInt input
-                , driverStation = stationString model.team (String.toInt input)
+                , driverStation = stationIndex model.team (String.toInt input)
             }
 
         Start ->
             { model
                 | isStarted = not model.isStarted
-                , driverStation = stationString model.team model.match
+                , driverStation = stationIndex model.team model.match
             }
 
 
-startButton : Model -> Html.Html Msg
-startButton model =
+startButton : Bool -> Html.Html Msg
+startButton isStarted =
     Html.div []
         [ Html.button [ onClick Start ]
             [ Html.text <|
-                if model.isStarted then
+                if isStarted then
                     "Started"
 
                 else
@@ -85,29 +85,50 @@ startButton model =
         ]
 
 
+type alias StrModel =
+    { scouter : String
+    , team : String
+    , match : String
+    , driverStation : String
+    , isStarted : Bool
+    }
+
+
 view : Model -> Html.Html Msg
 view model =
+    let
+        strModel : StrModel
+        strModel =
+            { scouter = model.scouter
+            , team = unwrapToString model.team
+            , match = unwrapToString model.match
+            , driverStation = model.driverStation
+            , isStarted = model.isStarted
+            }
+    in
     if model.isStarted then
-        view2 model
+        view2 strModel
 
     else
-        view1 model
+        view1 strModel
 
 
-view1 : Model -> Html.Html Msg
+view1 : StrModel -> Html.Html Msg
 view1 model =
     Html.div []
-        [ Html.div [ style "text-decoration" "underline" ] [ Html.text <| "Pre-Scout screen:   " ++ model.driverStation ]
+        [ Html.div
+            [ style "text-decoration" "underline" ]
+            [ Html.text <| "Pre-Scout screen:   " ++ model.driverStation ]
         , Html.div []
             [ inputs "Scouter's name:" NameInput model.scouter
-            , inputs "Team's number:" TeamInput << unwrapToString <| model.team
-            , inputs "Match number:" MatchInput << unwrapToString <| model.match
+            , inputs "Team's number:" TeamInput model.team
+            , inputs "Match number:" MatchInput model.match
             ]
-        , startButton model
+        , startButton model.isStarted
         ]
 
 
-view2 : Model -> Html.Html Msg
+view2 : StrModel -> Html.Html Msg
 view2 model =
     Html.pre []
         [ Html.div
@@ -118,13 +139,13 @@ view2 model =
                 [ "\nname - "
                 , model.scouter
                 , "\nteam - "
-                , unwrapToString <| model.team
+                , model.team
                 , "\nmatch - "
-                , unwrapToString <| model.match
+                , model.match
                 , "\nstation - "
                 , model.driverStation
                 , "\n\n"
                 , Matches.asComment
                 ]
-        , startButton model
+        , startButton model.isStarted
         ]

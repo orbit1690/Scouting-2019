@@ -1,4 +1,4 @@
-module Matches exposing (asComment, stationString)
+module Matches exposing (asComment, stationIndex)
 
 import List.Extra exposing (elemIndex, getAt)
 import Maybe exposing (withDefault)
@@ -32,55 +32,44 @@ getMatch match =
     -- == {blue = {one = team1, two = team2, three = team3}, red = {one = team4, two = team5, three = team6}}
     case match of
         Nothing ->
-            Nothing 
+            Nothing
+
         Just n ->
-            getAt n matches
-    
-        
+            getAt (n - 1) matches
 
 
 stationIndex : Maybe Int -> Maybe Int -> String
 stationIndex team match =
     -- team2 -> index = 2
-    -- unwrapToString << elemIndex (withDefault 0 team) << getMatch <| withDefault 0 match - 1
-    -- withDefault "" String.fromInt (getMatch match)
+    let
+        teamN =
+            withDefault 0 team
+    in
     case getMatch match of
-            Nothing ->
-                ""
-            Just matchData ->
-                if matchData.blue.one == team then "כחול 1"
-                else if matchData.blue.two == team then "כחול 2"
-                else if matchData.blue.three == team then "כחול 3"
-                else if matchData.red.one == team then "אדום 1"
-                else if matchData.red.two == team then "אדום 2"
-                else if matchData.red.three == team then "אדום 3"
-                else ""
+        Nothing ->
+            "Not a match"
 
+        Just matchData ->
+            if matchData.blue.one == teamN then
+                "כחול 1"
 
-stationString : Maybe Int -> Maybe Int -> String
-stationString team match =
-    -- Gets model.team and model.match from update, and calls stationIndex
-    case stationIndex team match of
-        "0" ->
-            "כחול 1"
+            else if matchData.blue.two == teamN then
+                "כחול 2"
 
-        "1" ->
-            "כחול 2"
+            else if matchData.blue.three == teamN then
+                "כחול 3"
 
-        "2" ->
-            "כחול 3"
+            else if matchData.red.one == teamN then
+                "אדום 1"
 
-        "3" ->
-            "אדום 1"
+            else if matchData.red.two == teamN then
+                "אדום 2"
 
-        "4" ->
-            "אדום 2"
+            else if matchData.red.three == teamN then
+                "אדום 3"
 
-        "5" ->
-            "אדום 3"
-
-        _ ->
-            ""
+            else
+                "Team not in this match"
 
 
 asComment : String
