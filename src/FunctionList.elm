@@ -1,8 +1,8 @@
-module FunctionList exposing (..)
+module FunctionList exposing (inputs, unwrapToString)
 
 import Html
-import Html.Attributes exposing (placeholder, style, value)
-import Html.Events exposing (onClick, onInput)
+import Html.Attributes exposing (placeholder, value)
+import Html.Events exposing (onInput)
 import Maybe
 import Maybe.Extra exposing (unwrap)
 

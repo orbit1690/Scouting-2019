@@ -1,7 +1,7 @@
 module Page1 exposing (init1, update1, view1)
 
 import Browser
-import FunctionList exposing (..)
+import FunctionList exposing (inputs, unwrapToString)
 import Html
 import Html.Attributes exposing (placeholder, style, value)
 import Html.Events exposing (onClick, onInput)

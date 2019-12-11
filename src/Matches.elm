@@ -1,6 +1,5 @@
 module Matches exposing (asComment, stationString)
 
-import FunctionList exposing (..)
 import List.Extra exposing (elemIndex, getAt)
 import Maybe exposing (withDefault)
 import String

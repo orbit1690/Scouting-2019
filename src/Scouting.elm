@@ -1,11 +1,11 @@
 module Scouting exposing (Model, Msg, init, main, update, view)
 
 import Browser
-import FunctionList exposing (..)
+import FunctionList exposing (inputs, unwrapToString)
 import Html
 import Html.Attributes exposing (placeholder, style, value)
 import Html.Events exposing (onClick, onInput)
-import Matches exposing (asComment, indexToName)
+import Matches exposing (asComment, stationString)
 import Tuple exposing (first, second)
 
 
@@ -29,13 +29,9 @@ type alias Model =
     { scouter : String
     , team : Maybe Int
     , match : Maybe Int
-    , driverStation : String --PossibleStations
+    , driverStation : String
     , isStarted : Bool
     }
-
-
-type alias BoolModel =
-    { isStarted : Bool }
 
 
 init : Model
@@ -59,35 +55,20 @@ update msg model =
         TeamInput input ->
             { model
                 | team = String.toInt input
-                , driverStation = indexToName (String.toInt input) model.match
+                , driverStation = stationString (String.toInt input) model.match
             }
 
         MatchInput input ->
             { model
                 | match = String.toInt input
-                , driverStation = indexToName model.team (String.toInt input)
+                , driverStation = stationString model.team (String.toInt input)
             }
 
         Start ->
             { model
                 | isStarted = not model.isStarted
-                , driverStation = indexToName model.team model.match
+                , driverStation = stationString model.team model.match
             }
-
-
-inputs : String -> (String -> msg) -> String -> Html.Html msg
-inputs description inputType getValue =
-    Html.pre []
-        [ Html.text <| description
-        , Html.div []
-            [ Html.input
-                [ placeholder <| String.replace ":" "..." description
-                , onInput inputType
-                , value getValue
-                ]
-                []
-            ]
-        ]
 
 
 startButton : Model -> Html.Html Msg
@@ -129,7 +110,9 @@ view1 model =
 view2 : Model -> Html.Html Msg
 view2 model =
     Html.pre []
-        [ Html.div [ style "text-decoration" "underline" ] [ Html.text "Status:\n" ]
+        [ Html.div
+            [ style "text-decoration" "underline" ]
+            [ Html.text "Status:\n" ]
         , Html.text <|
             String.concat
                 [ "\nname - "
