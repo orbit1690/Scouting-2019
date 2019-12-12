@@ -78,7 +78,7 @@ subscriptions model =
 
 init : Model
 init =
-    { teamData = TeamDataView.init "" "" 0 0
-    , autonomousData = AutonomousDataView.init "" "" 0 0
+    { teamData = TeamDataView.init "" Nothing Nothing
+    , autonomousData = AutonomousDataView.init "" 0 0 ""
     , pages = Page1
     }

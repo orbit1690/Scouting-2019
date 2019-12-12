@@ -39,13 +39,18 @@ checkbox modelValue nextButton name =
         [ input [ placeholder name, onInput nextButton, value modelValue ] [] ]
 
 
-init : String -> String -> Int -> Int -> Model
-init sN dSP tN mN =
-    { scouterName = sN
-    , driverStationPosition = dSP
-    , match = mN
-    , team = tN
-    }
+checkList : String -> (String -> Msg) -> String -> Html.Html Msg
+checkList modelValue nextButton name =
+    label
+        [ style "padding" "20px" ]
+        [ input [ type_ "checkbox", placeholder name, onInput nextButton, value modelValue ] []
+        , text name
+        ]
+
+
+init : String -> Int -> Int -> String -> Model
+init sN tN mN dsp =
+    Model sN mN tN dsp
 
 
 update : Msg -> Model -> Model
