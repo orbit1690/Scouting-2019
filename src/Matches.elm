@@ -1,4 +1,4 @@
-module Matches exposing (asComment, stationIndex)
+module Matches exposing (asComment, stationName)
 
 import List.Extra exposing (elemIndex, getAt)
 import Maybe exposing (withDefault)
@@ -38,16 +38,20 @@ getMatch match =
             getAt (n - 1) matches
 
 
-stationIndex : Maybe Int -> Maybe Int -> String
-stationIndex team match =
-    -- team2 -> index = 2
+getTeam : Int -> Int -> String
+getTeam team index =
+    "not yet"
+
+
+stationName : Maybe Int -> Maybe Int -> String
+stationName team match =
     let
         teamN =
             withDefault 0 team
     in
     case getMatch match of
         Nothing ->
-            "Not a match"
+            " "
 
         Just matchData ->
             if matchData.blue.one == teamN then
@@ -69,7 +73,7 @@ stationIndex team match =
                 "אדום 3"
 
             else
-                "Team not in this match"
+                "  "
 
 
 asComment : String

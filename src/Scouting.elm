@@ -1,12 +1,12 @@
 module Scouting exposing (Model, Msg, init, main, update, view)
 
+import Auto
 import Browser
 import FunctionList exposing (inputs, unwrapToString)
 import Html
-import Html.Attributes exposing (placeholder, style, value)
+import Html.Attributes exposing (style)
 import Html.Events exposing (onClick, onInput)
-import Matches exposing (asComment, stationIndex)
-import Tuple exposing (first, second)
+import Matches exposing (asComment, stationName)
 
 
 main : Program () Model Msg
@@ -30,8 +30,14 @@ type alias Model =
     , team : Maybe Int
     , match : Maybe Int
     , driverStation : String
-    , isStarted : Bool
+    , isStarted : ButtonState
     }
+
+
+type ButtonState
+    = Pushed
+    | TriedPush
+    | Untouched
 
 
 init : Model
@@ -40,7 +46,7 @@ init =
     , team = Nothing
     , match = Nothing
     , driverStation = ""
-    , isStarted = False
+    , isStarted = Untouched
     }
 
 
@@ -55,32 +61,91 @@ update msg model =
         TeamInput input ->
             { model
                 | team = String.toInt input
-                , driverStation = stationIndex (String.toInt input) model.match
+                , driverStation = stationName (String.toInt input) model.match
             }
 
         MatchInput input ->
             { model
                 | match = String.toInt input
-                , driverStation = stationIndex model.team (String.toInt input)
+                , driverStation = stationName model.team (String.toInt input)
             }
 
         Start ->
             { model
-                | isStarted = not model.isStarted
-                , driverStation = stationIndex model.team model.match
+                | isStarted = switchButtonState model
+                , driverStation = stationName model.team model.match
             }
 
 
-startButton : Bool -> Html.Html Msg
-startButton isStarted =
-    Html.div []
-        [ Html.button [ onClick Start ]
-            [ Html.text <|
-                if isStarted then
-                    "Started"
+ifCorrectInput : Model -> ButtonState
+ifCorrectInput model =
+    let
+        modelStr =
+            strModel model
+
+        isStation string =
+            model.driverStation == string
+    in
+    if modelStr.scouter == "" then
+        TriedPush
+
+    else if modelStr.team == "" then
+        TriedPush
+
+    else if modelStr.match == "" then
+        TriedPush
+
+    else if isStation " " || isStation "  " then
+        TriedPush
+
+    else
+        Pushed
+
+
+switchButtonState : Model -> ButtonState
+switchButtonState model =
+    if model.isStarted == Pushed then
+        Untouched
+
+    else
+        ifCorrectInput model
+
+
+inputHelpMessage : String -> String
+inputHelpMessage strStation =
+    case strStation of
+        " " ->
+            "Not a match"
+
+        "  " ->
+            "Team not in this match"
+
+        "" ->
+            "Please fill all inputs."
+
+        _ ->
+            ""
+
+
+startButton : StrModel -> Html.Html Msg
+startButton model =
+    let
+        ifStarted : String -> String -> Html.Html Msg
+        ifStarted ifYes ifNo =
+            Html.text <|
+                if model.isStarted == Pushed then
+                    ifYes
 
                 else
-                    "Startn't"
+                    ifNo
+    in
+    Html.pre []
+        [ Html.button [ onClick Start ]
+            [ ifStarted "Started" "Startn't"
+            ]
+        , Html.div [ style "color" "blue" ]
+            [ ifStarted "" <|
+                inputHelpMessage model.driverStation
             ]
         ]
 
@@ -90,31 +155,37 @@ type alias StrModel =
     , team : String
     , match : String
     , driverStation : String
-    , isStarted : Bool
+    , isStarted : ButtonState
+    }
+
+
+strModel : Model -> StrModel
+strModel model =
+    { scouter = model.scouter
+    , team = unwrapToString model.team
+    , match = unwrapToString model.match
+    , driverStation = model.driverStation
+    , isStarted = model.isStarted
     }
 
 
 view : Model -> Html.Html Msg
 view model =
-    let
-        strModel : StrModel
-        strModel =
-            { scouter = model.scouter
-            , team = unwrapToString model.team
-            , match = unwrapToString model.match
-            , driverStation = model.driverStation
-            , isStarted = model.isStarted
-            }
-    in
-    if model.isStarted then
-        view2 strModel
+    if model.isStarted == Pushed then
+        confirmationView <| strModel model
+        {- Html.div []
+           [ Auto.view model
+           , startButton model
+           ]
+        -}
+        -- planning to replace confirmaion page w Auto
 
     else
-        view1 strModel
+        registryView <| strModel model
 
 
-view1 : StrModel -> Html.Html Msg
-view1 model =
+registryView : StrModel -> Html.Html Msg
+registryView model =
     Html.div []
         [ Html.div
             [ style "text-decoration" "underline" ]
@@ -124,12 +195,12 @@ view1 model =
             , inputs "Team's number:" TeamInput model.team
             , inputs "Match number:" MatchInput model.match
             ]
-        , startButton model.isStarted
+        , startButton model
         ]
 
 
-view2 : StrModel -> Html.Html Msg
-view2 model =
+confirmationView : StrModel -> Html.Html Msg
+confirmationView model =
     Html.pre []
         [ Html.div
             [ style "text-decoration" "underline" ]
@@ -147,5 +218,5 @@ view2 model =
                 , "\n\n"
                 , Matches.asComment
                 ]
-        , startButton model.isStarted
+        , startButton model
         ]
