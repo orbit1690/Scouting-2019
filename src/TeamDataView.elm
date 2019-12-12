@@ -5,7 +5,7 @@ import Html.Attributes as Attributes exposing (checked, name, placeholder, style
 import Html.Events as Events exposing (onClick, onInput)
 import Http
 import Json.Decode
-import PrimaryModules
+import PrimaryModules exposing (Position)
 import String
 
 
@@ -25,7 +25,7 @@ type alias Model =
     { scouterName : String
     , team : Int
     , match : Int
-    , driverStationPosition : Color Position
+    , driverStationPosition : String
     }
 
 
@@ -49,8 +49,8 @@ enumList : Model -> Html.Html Msg
 enumList model =
     div []
         [ fieldset []
-            [ enumProperty (model.driverStationPosition == 1 Red) 1 Red
-            , enumProperty (model.driverStationPosition == 2 Red) 2 Red
+            [ enumProperty (model.driverStationPosition == 1 Red) 1 Red ""
+            , enumProperty (model.driverStationPosition == 2 Red) 2 Red ""
             , enumProperty (model.driverStationPosition == 3 Red) 3 Red
             , enumProperty (model.driverStationPosition == 1 Blue) 1 Blue
             , enumProperty (model.driverStationPosition == 2 Blue) 2 Blue
@@ -59,8 +59,8 @@ enumList model =
         ]
 
 
-enumProperty : Bool -> String -> Html.Html Msg
-enumProperty isChecked color position =
+enumProperty : Bool -> Position -> Color -> String -> Html.Html Msg
+enumProperty isChecked position color name =
     label
         [ style "padding" "2%" ]
         [ input [ type_ "radio", placeholder name, onInput <| DriverStationPositionInput color position, checked isChecked ] []
@@ -70,11 +70,7 @@ enumProperty isChecked color position =
 
 init : String -> String -> Int -> Int -> Model
 init sN dSP tN mN =
-    { scouterName = sN
-    , driverStationPosition = dSP
-    , match = mN
-    , team = tN
-    }
+    Model sN dSP mN tN
 
 
 update : Msg -> Model -> Model
