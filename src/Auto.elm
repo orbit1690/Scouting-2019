@@ -1,6 +1,7 @@
 module Auto exposing (init, update, view)
 
 import Browser
+import Debug
 import FunctionList exposing (inputs, unwrapToString)
 import Html
 import Html.Attributes exposing (placeholder, style, value)
@@ -44,11 +45,15 @@ init =
 
 view : Model -> Html.Html msg
 view model =
-    Html.text "not ready yet"
+    Debug.todo "make view for Auto.elm"
+
+
+
+-- TODO: define view
 
 
 update : Msg -> Model -> Model
 update msg model =
     case msg of
         _ ->
-            model
+            Debug.todo "make update for Auto.elm"

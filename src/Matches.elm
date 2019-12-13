@@ -51,6 +51,7 @@ stationName team match =
     in
     case getMatch match of
         Nothing ->
+            -- Not a match
             " "
 
         Just matchData ->
@@ -73,6 +74,7 @@ stationName team match =
                 "אדום 3"
 
             else
+                -- Team not in this match
                 "  "
 
 

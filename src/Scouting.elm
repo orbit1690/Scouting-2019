@@ -45,7 +45,7 @@ init =
     { scouter = ""
     , team = Nothing
     , match = Nothing
-    , driverStation = ""
+    , driverStation = "    " -- for inputHelpMessage
     , isStarted = Untouched
     }
 
@@ -96,6 +96,7 @@ ifCorrectInput model =
         TriedPush
 
     else if isStation " " || isStation "  " then
+        -- " " Not a match , "  " Team not in this match
         TriedPush
 
     else
@@ -114,14 +115,17 @@ switchButtonState model =
 inputHelpMessage : String -> String
 inputHelpMessage strStation =
     case strStation of
-        " " ->
-            "Not a match"
+        "    " ->
+            "Please fill all inputs^^"
 
         "  " ->
             "Team not in this match"
 
+        " " ->
+            "Not a match"
+
         "" ->
-            "Please fill all inputs."
+            "All inputs are required."
 
         _ ->
             ""
