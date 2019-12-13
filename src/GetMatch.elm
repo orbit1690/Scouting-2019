@@ -1,4 +1,4 @@
-module GetMatch exposing (getMatch, maybeIntToInt)
+module GetMatch exposing (getMatch, maybeIntToInt, unwrapToString)
 
 import List.Extra exposing (getAt)
 import Maybe.Extra exposing (unwrap)
@@ -34,6 +34,11 @@ checkMatch match =
 
         Just n ->
             getAt (n - 1) matches
+
+
+unwrapToString : Maybe Int -> String
+unwrapToString maybeInt =
+    unwrap "" String.fromInt maybeInt
 
 
 maybeIntToInt : Maybe Int -> Int
