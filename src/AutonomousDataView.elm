@@ -1,10 +1,11 @@
 module AutonomousDataView exposing (Model, Msg, init, subscriptions, update, view)
 
-import Html exposing (button, div, input, label, text)
-import Html.Attributes as Attributes exposing (placeholder, style, type_, value)
-import Html.Events as Events exposing (onClick, onInput)
+import Element exposing (column)
+import Element.Font as Font
+import Element.Input as Input exposing (labelHidden)
+import GetMatch exposing (getMatch, maybeIntToInt, unwrapToString)
 import Http
-import Json.Decode
+import Maybe
 import String
 
 
@@ -12,36 +13,38 @@ type Msg
     = ScouterInput String
     | TeamInput String
     | MatchInput String
-    | DriverStationPositionInput String
 
 
 type alias Model =
     { scouterName : String
-    , team : Int
-    , match : Int
-    , driverStationPosition : String
+    , team : Maybe Int
+    , match : Maybe Int
     }
 
 
-autonomousDataView : Model -> Html.Html Msg
+autonomousDataView : Model -> Element.Element Msg
 autonomousDataView model =
-    Html.pre []
+    column []
         [ checkbox model.scouterName ScouterInput "test"
-        , checkbox (String.fromInt model.team) TeamInput "test"
-        , checkbox (String.fromInt model.match) MatchInput "test"
-        , checkbox model.driverStationPosition DriverStationPositionInput "test"
+        , checkbox (unwrapToString model.team) TeamInput "test"
+        , checkbox (unwrapToString model.match) MatchInput "test"
+        , Element.text <| getMatch model.team model.match
         ]
 
 
-checkbox : String -> (String -> Msg) -> String -> Html.Html Msg
+checkbox : String -> (String -> Msg) -> String -> Element.Element Msg
 checkbox modelValue nextButton name =
-    div []
-        [ input [ placeholder name, onInput nextButton, value modelValue ] [] ]
+    Input.text []
+        { onChange = nextButton
+        , text = modelValue
+        , placeholder = Just <| Input.placeholder [] (Element.text name)
+        , label = labelHidden modelValue
+        }
 
 
-init : String -> Int -> Int -> String -> Model
-init sN tN mN dsp =
-    Model sN mN tN dsp
+init : String -> Maybe Int -> Maybe Int -> Model
+init sN tN mN =
+    Model sN mN tN
 
 
 update : Msg -> Model -> Model
@@ -51,16 +54,13 @@ update msg model =
             { model | scouterName = s }
 
         TeamInput s ->
-            { model | team = Maybe.withDefault 0 <| String.toInt s }
+            { model | team = String.toInt s }
 
         MatchInput s ->
-            { model | match = Maybe.withDefault 0 <| String.toInt s }
-
-        DriverStationPositionInput s ->
-            { model | driverStationPosition = s }
+            { model | match = String.toInt s }
 
 
-view : Model -> Html.Html Msg
+view : Model -> Element.Element Msg
 view model =
     autonomousDataView model
 

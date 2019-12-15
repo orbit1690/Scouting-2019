@@ -1,11 +1,14 @@
 module TeamDataView exposing (Model, Msg, init, subscriptions, update, view)
 
+import Colors exposing (black, blue, pink, red, sky, white, yellow)
+import Element exposing (centerX, centerY, column, fill, height, minimum, padding, px, spacing, width)
+import Element.Background as Background
+import Element.Border as Border exposing (widthXY)
+import Element.Font as Font exposing (center)
+import Element.Input as Input exposing (labelHidden)
 import GetMatch exposing (getMatch, maybeIntToInt, unwrapToString)
-import Html exposing (button, div, input, label, text)
-import Html.Attributes as Attributes exposing (placeholder, style, type_, value)
-import Html.Events as Events exposing (onClick, onInput)
 import Http
-import Json.Decode
+import Maybe
 import String
 
 
@@ -22,20 +25,60 @@ type alias Model =
     }
 
 
-teamDataView : Model -> Html.Html Msg
+teamDataView : Model -> Element.Element Msg
 teamDataView model =
-    Html.pre []
+    column
+        [ Background.color sky
+        , Border.color black
+        , padding 50
+        , spacing 20
+        , widthXY 5 5
+        , centerX
+        , centerY
+        ]
         [ checkbox model.scouterName ScouterInput "Scouter's name"
         , checkbox (unwrapToString model.team) TeamInput "Scouted team number"
         , checkbox (unwrapToString model.match) MatchInput "Match number"
-        , div [] [ text <| getMatch model.team model.match ]
+        , Element.el
+            [ Background.gradient
+                { angle = 3
+                , steps = [ red, pink, yellow ]
+                }
+            , width (fill |> minimum 350)
+            , height fill
+            , center
+            , Font.color white
+            , Font.glow blue 5
+            , Font.size 20
+            , Font.family
+                [ Font.external
+                    { name = "Pacifico"
+                    , url = "https://fonts.googleapis.com/css?family=Pacifico"
+                    }
+                ]
+            ]
+            (Element.text <| getMatch model.team model.match)
         ]
 
 
-checkbox : String -> (String -> Msg) -> String -> Html.Html Msg
+checkbox : String -> (String -> Msg) -> String -> Element.Element Msg
 checkbox modelValue nextButton name =
-    div []
-        [ input [ placeholder name, onInput nextButton, value modelValue ] [] ]
+    Input.text
+        [ Font.color sky
+        , Font.size 20
+        , height fill
+        , Font.family
+            [ Font.external
+                { name = "Pacifico"
+                , url = "https://fonts.googleapis.com/css?family=Pacifico"
+                }
+            ]
+        ]
+        { onChange = nextButton
+        , text = modelValue
+        , placeholder = Just <| Input.placeholder [] (Element.text name)
+        , label = labelHidden modelValue
+        }
 
 
 init : String -> Maybe Int -> Maybe Int -> Model
@@ -56,7 +99,7 @@ update msg model =
             { model | match = String.toInt s }
 
 
-view : Model -> Html.Html Msg
+view : Model -> Element.Element Msg
 view model =
     teamDataView model
 
