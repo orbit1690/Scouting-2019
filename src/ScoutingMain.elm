@@ -3,7 +3,6 @@ module ScoutingMain exposing (Model, Msg, init, subscriptions, update, view)
 import AutonomousDataView
 import Browser
 import Colors exposing (black, blue, blueGreen, lightBlue, orange, purple, sky, white)
-import Debug
 import Element exposing (centerX, centerY, column, fill, height, layout, maximum, padding, rgb255, shrink, spacing, text, width)
 import Element.Background as Background
 import Element.Border as Border
