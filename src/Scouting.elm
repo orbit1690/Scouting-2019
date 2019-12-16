@@ -1,18 +1,26 @@
-module Scouting exposing (Model, Msg, init, main, update, view)
+module Scouting exposing (Model, Msg, init, update, view)
 
 import Browser
-import Html exposing (input, text)
+import Element exposing (el, layout, padding)
+import Element.Input as Input exposing (labelAbove, labelHidden)
+import Html
 import Html.Attributes exposing (placeholder, style, value)
 import Html.Events exposing (onClick, onInput)
 import Maybe.Extra exposing (unwrap)
 
 
 inputWriter : String -> (String -> Msg) -> String -> Html.Html Msg
-inputWriter placeholderInput msg model =
-    Html.div [ style "margin-bottom" "1%" ]
-        [ input [ placeholder placeholderInput, onInput msg, value model ]
-            []
-        ]
+inputWriter placeholder msg model =
+    layout [] <|
+        el
+            [ padding 10 ]
+        <|
+            Input.text []
+                { onChange = msg
+                , placeholder = Just <| Input.placeholder [] (Element.text placeholder)
+                , text = model
+                , label = labelHidden model
+                }
 
 
 unwrapToString : Maybe Int -> String
@@ -90,7 +98,7 @@ viewWhenPressed : Model -> Html.Html Msg
 viewWhenPressed model =
     Html.pre []
         [ inputWriter "your name" ScoutersNameInput model.scoutersName
-        , inputWriter "scouted team number" TeamNumberInput << unwrapToString <| model.scoutedTeamNumber
+        , inputWriter "team number" TeamNumberInput << unwrapToString <| model.scoutedTeamNumber
         , inputWriter "match number" MatchNumberInput << unwrapToString <| model.matchNumber
         , inputWriter "driver station position" DriverStationInput model.scoutedTeamDriverStationPosition
         , Html.button [ onClick <| Page Pressed ] [ Html.text "second page" ]
