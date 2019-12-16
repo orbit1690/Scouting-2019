@@ -2,10 +2,12 @@ module Scouting exposing (Model, Msg, init, main, update, view)
 
 import Auto
 import Browser
-import FunctionList exposing (inputs, unwrapToString)
-import Html
-import Html.Attributes exposing (style)
-import Html.Events exposing (onClick, onInput)
+import Element exposing (column, el, fill, layout, rgba, spacing, text, width)
+import Element.Background as Background
+import Element.Border as Border
+import Element.Font as Font
+import Element.Input exposing (button, labelBelow, placeholder, username)
+import InputHelper exposing (inputs, unwrapToString)
 import Matches exposing (asComment, stationName)
 
 
@@ -13,7 +15,7 @@ main : Program () Model Msg
 main =
     Browser.sandbox
         { init = init
-        , view = view
+        , view = layout [] << view
         , update = update
         }
 
@@ -86,13 +88,7 @@ ifCorrectInput model =
         isStation string =
             model.driverStation == string
     in
-    if modelStr.scouter == "" then
-        TriedPush
-
-    else if modelStr.team == "" then
-        TriedPush
-
-    else if modelStr.match == "" then
+    if List.any ((==) "" << (|>) modelStr) [ .scouter, .team, .match ] then
         TriedPush
 
     else if isStation " " || isStation "  " then
@@ -131,26 +127,31 @@ inputHelpMessage strStation =
             ""
 
 
-startButton : StrModel -> Html.Html Msg
+startButton : StrModel -> Element.Element Msg
 startButton model =
     let
-        ifStarted : String -> String -> Html.Html Msg
+        ifStarted : String -> String -> String
         ifStarted ifYes ifNo =
-            Html.text <|
-                if model.isStarted == Pushed then
-                    ifYes
+            if model.isStarted == Pushed then
+                ifYes
 
-                else
-                    ifNo
+            else
+                ifNo
     in
-    Html.pre []
-        [ Html.button [ onClick Start ]
-            [ ifStarted "Started" "Startn't"
+    column [ Font.color (rgba 255 0 0 1) ]
+        [ button
+            [ Background.color (rgba 0 0 0 0.4)
+            , Font.color (rgba 1 1 1 1)
+            , Border.rounded 3
+            , width <| Element.px 50
             ]
-        , Html.div [ style "color" "blue" ]
-            [ ifStarted "" <|
-                inputHelpMessage model.driverStation
-            ]
+            { onPress = Just Start
+            , label = text <| ifStarted "Startn't" "Start"
+            }
+        , text
+            << ifStarted ""
+          <|
+            inputHelpMessage model.driverStation
         ]
 
 
@@ -173,54 +174,52 @@ strModel model =
     }
 
 
-view : Model -> Html.Html Msg
+view : Model -> Element.Element Msg
 view model =
-    if model.isStarted == Pushed then
-        confirmationView <| strModel model
-        {- Html.div []
-           [ Auto.view model
+    {-
+       if model.isStarted == Pushed then
+           confirmationView <| strModel model
+
+       else
+    -}
+    registryView <| strModel model
+
+
+registryView : StrModel -> Element.Element Msg
+registryView model =
+    column
+        [ Font.color (rgba 1 1 1 1)
+        , Element.padding 4
+        , spacing 10
+        ]
+        [ inputs "Scouter's name:" NameInput model.scouter
+        , inputs "Team's number:" TeamInput model.team
+        , inputs "Match number:" MatchInput model.match
+        , startButton model
+        ]
+
+
+
+{-
+   confirmationView : StrModel -> Element.Element Msg
+   confirmationView model =
+       Html.pre []
+           [ Html.div
+               [ style "text-decoration" "underline" ]
+               [ Html.text "Status:\n" ]
+           , Html.text <|
+               String.concat
+                   [ "\nname - "
+                   , model.scouter
+                   , "\nteam - "
+                   , model.team
+                   , "\nmatch - "
+                   , model.match
+                   , "\nstation - "
+                   , model.driverStation
+                   , "\n\n"
+                   , Matches.asComment
+                   ]
            , startButton model
            ]
-        -}
-        -- planning to replace confirmaion page w Auto
-
-    else
-        registryView <| strModel model
-
-
-registryView : StrModel -> Html.Html Msg
-registryView model =
-    Html.div []
-        [ Html.div
-            [ style "text-decoration" "underline" ]
-            [ Html.text <| "Pre-Scout screen:   " ++ model.driverStation ]
-        , Html.div []
-            [ inputs "Scouter's name:" NameInput model.scouter
-            , inputs "Team's number:" TeamInput model.team
-            , inputs "Match number:" MatchInput model.match
-            ]
-        , startButton model
-        ]
-
-
-confirmationView : StrModel -> Html.Html Msg
-confirmationView model =
-    Html.pre []
-        [ Html.div
-            [ style "text-decoration" "underline" ]
-            [ Html.text "Status:\n" ]
-        , Html.text <|
-            String.concat
-                [ "\nname - "
-                , model.scouter
-                , "\nteam - "
-                , model.team
-                , "\nmatch - "
-                , model.match
-                , "\nstation - "
-                , model.driverStation
-                , "\n\n"
-                , Matches.asComment
-                ]
-        , startButton model
-        ]
+-}

@@ -2,10 +2,10 @@ module Auto exposing (init, update, view)
 
 import Browser
 import Debug
-import FunctionList exposing (inputs, unwrapToString)
 import Html
 import Html.Attributes exposing (placeholder, style, value)
 import Html.Events exposing (onClick, onInput)
+import InputHelper exposing (inputs, unwrapToString)
 
 
 main : Program () Model Msg
